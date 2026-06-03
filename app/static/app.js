@@ -54,6 +54,10 @@ async function fetchDashboardData() {
             runClientSideSimulation();
             return;
         }
+        const ping = await fetch(`${API_BASE}/health`);
+        if (!ping.ok) {
+            throw new Error("Backend server unreachable");
+        }
         await Promise.all([
             updateHealthStatus(),
             updateMetrics(),
