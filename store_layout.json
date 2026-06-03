@@ -1,0 +1,80 @@
+{
+  "ST1076": {
+    "store_name": "Store 1 - Mumbai",
+    "open_hours": "09:00-21:00",
+    "timezone": "Asia/Kolkata",
+    "cameras": {
+      "cam1": {
+        "type": "entry_exit",
+        "coverage": ["ENTRY_ZONE"]
+      },
+      "CAM2": {
+        "type": "main_floor",
+        "coverage": ["PURPLLE_MUM_1076_Z01"]
+      },
+      "CAM3": {
+        "type": "main_floor",
+        "coverage": ["PURPLLE_MUM_1076_Z02"]
+      },
+      "CAM4": {
+        "type": "main_floor",
+        "coverage": ["PURPLLE_MUM_1076_Z03"]
+      },
+      "PURPLLE_MUM_1076_CAM6": {
+        "type": "billing",
+        "coverage": ["PURPLLE_MUM_1076_Z_BILLING_01"]
+      }
+    },
+    "zones": {
+      "PURPLLE_MUM_1076_Z01": {
+        "name": "Left Shelf",
+        "type": "SHELF"
+      },
+      "PURPLLE_MUM_1076_Z02": {
+        "name": "Center Display",
+        "type": "DISPLAY"
+      },
+      "PURPLLE_MUM_1076_Z03": {
+        "name": "Lipstick Aisle",
+        "type": "SHELF"
+      },
+      "PURPLLE_MUM_1076_Z_BILLING_01": {
+        "name": "Billing Counter Queue",
+        "type": "BILLING"
+      }
+    }
+  },
+  "ST1008": {
+    "store_name": "Store 2 - Delhi",
+    "open_hours": "10:00-22:00",
+    "timezone": "Asia/Kolkata",
+    "cameras": {
+      "entry1": {
+        "type": "entry_exit",
+        "coverage": ["ENTRY_ZONE"]
+      },
+      "entry2": {
+        "type": "entry_exit",
+        "coverage": ["ENTRY_ZONE"]
+      },
+      "zone": {
+        "type": "main_floor",
+        "coverage": ["ZONE"]
+      },
+      "billing": {
+        "type": "billing",
+        "coverage": ["BILLING_ZONE"]
+      }
+    },
+    "zones": {
+      "ZONE": {
+        "name": "Main Zone",
+        "type": "SHELF"
+      },
+      "BILLING_ZONE": {
+        "name": "Billing Area",
+        "type": "BILLING"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+# SQLite Database
+*.db
+
+# Python Caches & Build Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.egs/
+build/
+dist/
+*.egg-info/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# YOLOv8 Weights
+*.pt
+
+# Large Video Clips & Raw Assets
+*.mp4
+*.png
+previously missing resources/
+CCTV Footage-20260529T160731Z-3-00144614ea/

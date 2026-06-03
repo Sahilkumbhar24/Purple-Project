@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Store Intelligence - Live Analytics Dashboard</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body class="dark-mode">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-eye-low-vision"></i>
+                </div>
+                <div class="logo-text">
+                    <h2>APEX</h2>
+                    <span>INTELLIGENCE</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="section-title">STORES</span>
+                    <ul class="store-selector">
+                        <li class="store-item active" data-store-id="ST1076">
+                            <i class="fa-solid fa-shop"></i>
+                            <div>
+                                <span class="store-name">Store 1</span>
+                                <span class="store-sub">Mumbai Mall</span>
+                            </div>
+                            <span class="status-indicator online"></span>
+                        </li>
+                        <li class="store-item" data-store-id="ST1008">
+                            <i class="fa-solid fa-shop"></i>
+                            <div>
+                                <span class="store-name">Store 2</span>
+                                <span class="store-sub">Delhi Center</span>
+                            </div>
+                            <span class="status-indicator online"></span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section connection-status-panel">
+                    <span class="section-title">FEED HEALTH</span>
+                    <div class="health-card">
+                        <div class="health-status">
+                            <i class="fa-solid fa-circle-check" id="health-icon"></i>
+                            <span id="health-status-text">HEALTHY</span>
+                        </div>
+                        <div class="health-meta">
+                            <span>Lag: <strong id="health-lag">0.0s</strong></span>
+                            <span id="health-timestamp">Last: N/A</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <div>
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">Operations Manager</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="selected-store-title">Bengaluru Indiranagar</h1>
+                    <p class="subtitle"><i class="fa-regular fa-calendar"></i> Live Stream Analysis Window — <span id="current-active-date">Active Date: Loading...</span></p>
+                </div>
+                <div class="header-controls">
+                    <button class="btn btn-primary" id="btn-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    <div class="live-badge">
+                        <span class="pulse-dot"></span>
+                        LIVE STREAMING
+                    </div>
+                </div>
+            </header>
+
+            <!-- Metrics Grid -->
+            <section class="metrics-grid">
+                <div class="metric-card glassmorphism visitor-card">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <span>UNIQUE VISITORS</span>
+                        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                    </div>
+                    <div class="card-body">
+                        <h2 id="metric-visitors">--</h2>
+                        <span class="trend positive"><i class="fa-solid fa-arrow-trend-up"></i> In-Store Today</span>
+                    </div>
+                </div>
+
+                <div class="metric-card glassmorphism conversion-card">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <span>CONVERSION RATE</span>
+                        <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+                    </div>
+                    <div class="card-body">
+                        <h2 id="metric-conversion">--%</h2>
+                        <span class="trend positive"><i class="fa-solid fa-circle-check"></i> POS Correlated</span>
+                    </div>
+                </div>
+
+                <div class="metric-card glassmorphism queue-card">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <span>AVG QUEUE DEPTH</span>
+                        <div class="card-icon"><i class="fa-solid fa-people-arrows"></i></div>
+                    </div>
+                    <div class="card-body">
+                        <h2 id="metric-queue">--</h2>
+                        <span class="trend negative" id="queue-trend"><i class="fa-solid fa-user-group"></i> Active Counter</span>
+                    </div>
+                </div>
+
+                <div class="metric-card glassmorphism abandonment-card">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <span>ABANDONMENT RATE</span>
+                        <div class="card-icon"><i class="fa-solid fa-door-open"></i></div>
+                    </div>
+                    <div class="card-body">
+                        <h2 id="metric-abandonment">--%</h2>
+                        <span class="trend negative" id="abandon-trend"><i class="fa-solid fa-triangle-exclamation"></i> Left Checkout</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Dashboard Layout Grid -->
+            <section class="dashboard-body-grid">
+                <!-- Funnel & Heatmap -->
+                <div class="col-left">
+                    <!-- Funnel Chart Card -->
+                    <div class="dashboard-card glassmorphism">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-filter"></i> Customer Conversion Funnel</h3>
+                            <span class="badge">Session Unit Analysis</span>
+                        </div>
+                        <div class="card-body funnel-container" id="funnel-chart">
+                            <!-- Funnel steps rendered by JavaScript -->
+                            <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading Funnel...</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Heatmap Card -->
+                    <div class="dashboard-card glassmorphism">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-fire"></i> Store Zone Heatmap</h3>
+                            <span class="badge" id="confidence-badge">Confidence: --</span>
+                        </div>
+                        <div class="card-body heatmap-container">
+                            <div class="store-layout-map" id="store-heatmap">
+                                <!-- Store Layout Grid rendered by JavaScript -->
+                                <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading Heatmap...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anomalies & Live Ticker Feed -->
+                <div class="col-right">
+                    <!-- Active Anomalies Panel -->
+                    <div class="dashboard-card glassmorphism anomalies-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-triangle-exclamation text-warning"></i> Operational Anomalies</h3>
+                            <span class="pulse-badge" id="anomaly-count">0 Active</span>
+                        </div>
+                        <div class="card-body anomalies-list" id="anomalies-container">
+                            <div class="no-anomalies">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <p>System operating normally. No active anomalies detected.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Event Streaming Feed -->
+                    <div class="dashboard-card glassmorphism feed-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-tower-broadcast"></i> Live Pipeline Event Feed</h3>
+                            <span class="badge" id="feed-ticker-indicator">Active</span>
+                        </div>
+                        <div class="card-body ticker-container" id="event-feed-container">
+                            <!-- Live events will slide in here -->
+                            <div class="no-events">Waiting for pipeline connection... Run pipeline/run.bat to start stream.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
