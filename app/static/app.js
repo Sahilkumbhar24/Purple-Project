@@ -5,6 +5,7 @@ let activeStoreId = "ST1076";
 let refreshInterval = null;
 let lastKnownEventCount = 0;
 let knownEventIds = new Set();
+let isDemoFallbackMode = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     setupStoreSelectors();
@@ -49,6 +50,10 @@ function setupStoreSelectors() {
 
 async function fetchDashboardData() {
     try {
+        if (isDemoFallbackMode) {
+            runClientSideSimulation();
+            return;
+        }
         await Promise.all([
             updateHealthStatus(),
             updateMetrics(),
@@ -59,6 +64,12 @@ async function fetchDashboardData() {
         ]);
     } catch (e) {
         console.error("Error refreshing dashboard data:", e);
+        if (!isDemoFallbackMode) {
+            console.warn("FastAPI backend server is unreachable. Switching to offline mock demo fallback mode!");
+            isDemoFallbackMode = true;
+            initClientSideMockData();
+            runClientSideSimulation();
+        }
     }
 }
 
@@ -371,5 +382,187 @@ async function pollLiveEvents() {
         }
     } catch (e) {
         // Silent error
+    }
+}
+
+// ==========================================
+// CLIENT-SIDE DEMO FALLBACK SIMULATION
+// ==========================================
+
+let mockMetrics = {
+    unique_visitors: 12,
+    conversion_rate: 0.667,
+    queue_depth: 1.5,
+    abandonment_rate: 0.25
+};
+
+let mockFunnel = [
+    { stage: "Entry", count: 12, drop_off_pct: 0.0 },
+    { stage: "Zone Visit", count: 10, drop_off_pct: 16.7 },
+    { stage: "Billing Queue", count: 8, drop_off_pct: 20.0 },
+    { stage: "Purchase", count: 6, drop_off_pct: 25.0 }
+];
+
+let mockHeatmap = [
+    { zone_id: "PURPLLE_MUM_1076_Z01", zone_name: "Left Shelf", visit_count: 8, avg_dwell_ms: 120000, normalized_score: 100, data_confidence: true },
+    { zone_id: "PURPLLE_MUM_1076_Z02", zone_name: "Center Display", visit_count: 5, avg_dwell_ms: 85000, normalized_score: 62.5, data_confidence: true },
+    { zone_id: "PURPLLE_MUM_1076_Z03", zone_name: "Lipstick Aisle", visit_count: 6, avg_dwell_ms: 150000, normalized_score: 75, data_confidence: true },
+    { zone_id: "PURPLLE_MUM_1076_Z_BILLING_01", zone_name: "Billing Counter Queue", visit_count: 8, avg_dwell_ms: 95000, normalized_score: 100, data_confidence: true }
+];
+
+function initClientSideMockData() {
+    const textEl = document.getElementById("health-status-text");
+    const iconEl = document.getElementById("health-icon");
+    const lagEl = document.getElementById("health-lag");
+    const stampEl = document.getElementById("health-timestamp");
+    
+    textEl.textContent = "DEMO ONLINE";
+    textEl.style.color = "var(--color-warning)";
+    iconEl.className = "fa-solid fa-triangle-exclamation";
+    iconEl.style.color = "var(--color-warning)";
+    lagEl.textContent = "0.0s";
+    stampEl.textContent = "Last: Live Simulation";
+    document.getElementById("current-active-date").textContent = "Active Date: Static Live Demo";
+    
+    // Seed initial events
+    const firstEvents = [
+        { type: "ENTRY", text: "Visitor <strong>ID_70001</strong>: Entered the store" },
+        { type: "ZONE_ENTER", text: "Visitor <strong>ID_70001</strong>: Entered zone <strong>Left Shelf</strong>" },
+        { type: "ENTRY", text: "Visitor <strong>ID_70002</strong>: Entered the store" }
+    ];
+    
+    const container = document.getElementById("event-feed-container");
+    container.innerHTML = "";
+    firstEvents.forEach(evt => {
+        addMockEventUI(evt.type, evt.text);
+    });
+}
+
+function addMockEventUI(type, text) {
+    const container = document.getElementById("event-feed-container");
+    const item = document.createElement("div");
+    item.className = `feed-item ${type}`;
+    item.innerHTML = `
+        <div class="feed-left">
+            <span class="feed-indicator"></span>
+            <span class="feed-text">${text}</span>
+        </div>
+        <div class="feed-right">${new Date().toLocaleTimeString()}</div>
+    `;
+    container.insertBefore(item, container.firstChild);
+    if (container.children.length > 8) {
+        container.removeChild(container.lastChild);
+    }
+}
+
+function runClientSideSimulation() {
+    document.getElementById("metric-visitors").textContent = mockMetrics.unique_visitors;
+    document.getElementById("metric-conversion").textContent = `${(mockMetrics.conversion_rate * 100).toFixed(1)}%`;
+    document.getElementById("metric-queue").textContent = mockMetrics.queue_depth.toFixed(1);
+    document.getElementById("metric-abandonment").textContent = `${(mockMetrics.abandonment_rate * 100).toFixed(1)}%`;
+    
+    // Funnel
+    const funnelContainer = document.getElementById("funnel-chart");
+    funnelContainer.innerHTML = "";
+    mockFunnel.forEach(step => {
+        const stepEl = document.createElement("div");
+        stepEl.className = "funnel-step";
+        const entryCount = mockFunnel[0].count || 1;
+        const widthPct = (step.count / entryCount) * 100;
+        const dropClass = step.drop_off_pct > 0 ? "" : "zero";
+        const dropText = step.drop_off_pct > 0 ? `-${step.drop_off_pct}%` : "--";
+        stepEl.innerHTML = `
+            <div class="funnel-label">${step.stage}</div>
+            <div class="funnel-bar-wrapper">
+                <div class="funnel-bar" style="width: ${widthPct}%"></div>
+                <span class="funnel-val">${step.count}</span>
+            </div>
+            <div class="funnel-drop ${dropClass}">${dropText}</div>
+        `;
+        funnelContainer.appendChild(stepEl);
+    });
+    
+    // Heatmap
+    const storeMap = document.getElementById("store-heatmap");
+    storeMap.innerHTML = "";
+    
+    const entranceCell = document.createElement("div");
+    entranceCell.className = "heatmap-cell entrance";
+    entranceCell.innerHTML = `
+        <span class="cell-name">MAIN ENTRANCE</span>
+        <div class="cell-meta">
+            <span class="cell-val"><i class="fa-solid fa-door-open"></i></span>
+        </div>
+    `;
+    storeMap.appendChild(entranceCell);
+    
+    mockHeatmap.forEach(dbZone => {
+        const cell = document.createElement("div");
+        let glowClass = "active-glow";
+        let score = dbZone.normalized_score;
+        let visits = dbZone.visit_count;
+        let avgDwellMin = (dbZone.avg_dwell_ms / 60000).toFixed(1);
+        
+        if (score >= 80) glowClass += " lvl-hot";
+        else if (score >= 50) glowClass += " lvl-high";
+        else if (score >= 20) glowClass += " lvl-med";
+        else glowClass += " lvl-low";
+        
+        let zoneClass = "skincare";
+        const zid = dbZone.zone_id.toUpperCase();
+        if (zid.includes("BILLING")) zoneClass = "billing";
+        else if (zid.includes("Z02") || zid.includes("HAIR")) zoneClass = "haircare";
+        else if (zid.includes("Z03") || zid.includes("COSMETICS")) zoneClass = "cosmetics";
+        
+        cell.className = `heatmap-cell ${zoneClass} ${glowClass}`;
+        cell.innerHTML = `
+            <span class="cell-name">${dbZone.zone_name}</span>
+            <div class="cell-meta">
+                <div>
+                    <span class="cell-visits" style="display:block; font-size:10px; color:var(--text-muted)">${visits} visits</span>
+                    <span class="cell-dwell" style="font-size:10px; color:var(--text-muted)">${avgDwellMin}m avg</span>
+                </div>
+                <span class="cell-val">${score}%</span>
+            </div>
+        `;
+        storeMap.appendChild(cell);
+    });
+    
+    const badge = document.getElementById("confidence-badge");
+    badge.textContent = "Confidence: HIGH (Demo)";
+    badge.style.color = "var(--color-success)";
+    
+    // Simulate events occasionally
+    if (Math.random() > 0.6) {
+        simulateRandomEvent();
+    }
+}
+
+function simulateRandomEvent() {
+    const visitor_id = "ID_" + (70000 + Math.floor(Math.random() * 20));
+    const events_pool = [
+        { type: "ENTRY", text: `Visitor <strong>${visitor_id}</strong>: Entered the store` },
+        { type: "ZONE_ENTER", text: `Visitor <strong>${visitor_id}</strong>: Entered zone <strong>Center Display</strong>` },
+        { type: "ZONE_ENTER", text: `Visitor <strong>${visitor_id}</strong>: Entered zone <strong>Lipstick Aisle</strong>` },
+        { type: "BILLING_QUEUE_JOIN", text: `Visitor <strong>${visitor_id}</strong>: Joined billing queue` },
+        { type: "EXIT", text: `Visitor <strong>${visitor_id}</strong>: Exited the store` }
+    ];
+    
+    const selected = events_pool[Math.floor(Math.random() * events_pool.length)];
+    addMockEventUI(selected.type, selected.text);
+    
+    if (selected.type === "ENTRY") {
+        mockMetrics.unique_visitors += 1;
+        mockFunnel[0].count += 1;
+    } else if (selected.type === "ZONE_ENTER") {
+        mockFunnel[1].count += 1;
+    } else if (selected.type === "BILLING_QUEUE_JOIN") {
+        mockFunnel[2].count += 1;
+        mockMetrics.queue_depth = Math.min(5, mockMetrics.queue_depth + 0.3);
+    } else if (selected.type === "EXIT") {
+        if (Math.random() > 0.4) {
+            mockFunnel[3].count += 1;
+            mockMetrics.conversion_rate = mockFunnel[3].count / mockMetrics.unique_visitors;
+        }
     }
 }
